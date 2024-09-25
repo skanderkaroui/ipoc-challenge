@@ -1,13 +1,10 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { RiderList } from './RiderList'
+import { OrderManagement } from './OrderManagement'
+import { NotificationSystem } from './NotificationSystem'
 import { MapComponent } from './MapComponent'
-import React from 'react';
-
-// Placeholder components
-const RiderList = () => <div>Rider List Component</div>
-const OrderManagement = () => <div>Order Management Component</div>
-const NotificationSystem = () => <div>Notification System Component</div>
 
 // Mock data and types
 interface Rider {
@@ -37,7 +34,7 @@ const mockOrders: Order[] = [
   { id: '2', type: 'shop-and-deliver', status: 'assigned', location: { lat: 5.5913, lng: -0.2087 }, assignedRider: '1' },
 ]
 
-export default function Dashboard() {
+export function DashboardComponent() {
   const [riders, setRiders] = useState<Rider[]>(mockRiders)
   const [orders, setOrders] = useState<Order[]>(mockOrders)
   const [error, setError] = useState<string | null>(null)
