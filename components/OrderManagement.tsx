@@ -1,108 +1,145 @@
-import { useState } from 'react'
+// OrderManagement.tsx
+
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface Order {
   id: string
   type: 'direct' | 'shop-and-deliver'
-  status: 'pending' | 'assigned' | 'in-progress' | 'delivered'
+  source: 'Website' | 'Phone' | 'Call'
+  status: 'Pending' | 'Assigned' | 'In Progress' | 'Delivered'
   assignedRider?: string
 }
 
 interface Rider {
   id: string
   name: string
+  currentOrder?: string
 }
 
-interface OrderManagementProps {
-  orders: Order[]
-  riders: Rider[]
-  onAssign: (orderId: string, riderId: string) => void
-  onReassign: (orderId: string, newRiderId: string) => void
-  onUpdateStatus: (orderId: string, status: Order['status']) => void
-}
+export function OrderManagement() {
+  const [activeTab, setActiveTab] = useState<'Website' | 'Phone' | 'Call'>('Website')
+  const [orders, setOrders] = useState<Order[]>([
+    // Sample orders
+    { id: '1', type: 'direct', source: 'Website', status: 'Pending' },
+    { id: '2', type: 'shop-and-deliver', source: 'Phone', status: 'Assigned', assignedRider: 'r1' },
+    { id: '3', type: 'direct', source: 'Call', status: 'Delivered' },
+    // Add more orders as needed
+  ])
+  const [riders, setRiders] = useState<Rider[]>([
+    // Sample riders
+    { id: 'r1', name: 'Alice', currentOrder: '2' },
+    { id: 'r2', name: 'Bob' },
+    { id: 'r3', name: 'Charlie' },
+    // Add more riders as needed
+  ])
 
-export function OrderManagement({ orders, riders, onAssign, onReassign, onUpdateStatus }: OrderManagementProps) {
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null)
-  const [selectedRider, setSelectedRider] = useState<string | null>(null)
+  const assignOrder = (orderId: string, riderId: string) => {
+    // Update the order's status and assigned rider
+    setOrders(prevOrders =>
+      prevOrders.map(order =>
+        order.id === orderId ? { ...order, status: 'Assigned', assignedRider: riderId } : order
+      )
+    )
+    // Update the rider's current order
+    setRiders(prevRiders =>
+      prevRiders.map(rider =>
+        rider.id === riderId ? { ...rider, currentOrder: orderId } : rider
+      )
+    )
+  }
 
-  const handleAssign = () => {
-    if (selectedOrder && selectedRider) {
-      const order = orders.find(o => o.id === selectedOrder)
-      if (order?.assignedRider) {
-        onReassign(selectedOrder, selectedRider)
-      } else {
-        onAssign(selectedOrder, selectedRider)
-      }
-      setSelectedOrder(null)
-      setSelectedRider(null)
-    }
+  const onUpdateStatus = (orderId: string, status: Order['status']) => {
+    setOrders(prevOrders =>
+      prevOrders.map(order =>
+        order.id === orderId ? { ...order, status } : order
+      )
+    )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Order Management</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-4">
-          {orders.map((order) => (
-            <li key={order.id} className="border-b pb-2">
-              <h3 className="font-medium">Order {order.id}</h3>
-              <p className="text-sm text-muted-foreground">Type: {order.type}</p>
-              <p className="text-sm text-muted-foreground">Status: {order.status}</p>
-              {order.assignedRider && (
-                <p className="text-sm text-muted-foreground">
-                  Assigned to: {riders.find(r => r.id === order.assignedRider)?.name}
-                </p>
-              )}
-              <div className="mt-2 space-x-2">
-                <Button
-                  onClick={() => setSelectedOrder(order.id)}
-                  variant="outline"
-                  size="sm"
-                >
-                  {order.assignedRider ? 'Reassign' : 'Assign'}
-                </Button>
-                <Select
-                  onValueChange={(value) => onUpdateStatus(order.id, value as Order['status'])}
-                  defaultValue={order.status}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Update status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="assigned">Assigned</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </li>
-          ))}
-        </ul>
-        {selectedOrder && (
-          <div className="mt-4 space-y-2">
-            <Select onValueChange={setSelectedRider}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a rider" />
-              </SelectTrigger>
-              <SelectContent>
-                {riders.map((rider) => (
-                  <SelectItem key={rider.id} value={rider.id}>
-                    {rider.name}
-                  </SelectItem>
+    <>
+      {/* Order Summary Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="Website">Website</TabsTrigger>
+              <TabsTrigger value="Phone">Phone</TabsTrigger>
+              <TabsTrigger value="Call">Call</TabsTrigger>
+            </TabsList>
+            <TabsContent value={activeTab}>
+              <ul className="space-y-4">
+                {orders.filter(order => order.source === activeTab).map(order => (
+                  <li key={order.id} className="border-b pb-2">
+                    <h3 className="font-medium">Order {order.id}</h3>
+                    <p className="text-sm text-muted-foreground">Type: {order.type}</p>
+                    <p className="text-sm text-muted-foreground">Status: {order.status}</p>
+                    {order.assignedRider && (
+                      <p className="text-sm text-muted-foreground">
+                        Assigned to: {riders.find(r => r.id === order.assignedRider)?.name}
+                      </p>
+                    )}
+                    <div className="mt-2">
+                      <Select
+                        onValueChange={(value) => onUpdateStatus(order.id, value as Order['status'])}
+                        defaultValue={order.status}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Update status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Assigned">Assigned</SelectItem>
+                          <SelectItem value="In Progress">In Progress</SelectItem>
+                          <SelectItem value="Delivered">Delivered</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </li>
                 ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={handleAssign} className="w-full">
-              {orders.find(o => o.id === selectedOrder)?.assignedRider ? 'Reassign' : 'Assign'} Order
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              </ul>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Order Assignment Card */}
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Order Assignment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {orders.filter(order => order.status === 'Pending').map(order => (
+              <li key={order.id} className="border-b pb-2">
+                <h3 className="font-medium">Order {order.id}</h3>
+                <p className="text-sm text-muted-foreground">Type: {order.type}</p>
+                <div className="mt-2 space-y-2">
+                  <Select onValueChange={(riderId) => assignOrder(order.id, riderId)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a rider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {riders.filter(rider => !rider.currentOrder).map(rider => (
+                        <SelectItem key={rider.id} value={rider.id}>
+                          {rider.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </>
   )
 }
