@@ -96,8 +96,8 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="bg-blue-600 text-white p-4">
-        <h1 className="text-2xl font-bold">Delivery Management Dashboard - Ghana</h1>
+      <header className="bg-orange-600 text-white p-4">
+        <h1 className="text-2xl font-bold">Mealex & Mailex Admin Delivery Management Dashboard</h1>
       </header>
       <main className="flex-grow flex">
         <div className="w-2/3 p-4">
