@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/solid'; // Import icons if using
 
 interface Rider {
   id: string;
