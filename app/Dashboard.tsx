@@ -1,10 +1,13 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { RiderList } from './RiderList'
-import { OrderManagement } from './OrderManagement'
-import { NotificationSystem } from './NotificationSystem'
 import { MapComponent } from './MapComponent'
+import React from 'react';
+
+// Placeholder components
+const RiderList = () => <div>Rider List Component</div>
+const OrderManagement = () => <div>Order Management Component</div>
+const NotificationSystem = () => <div>Notification System Component</div>
 
 // Mock data and types
 interface Rider {
